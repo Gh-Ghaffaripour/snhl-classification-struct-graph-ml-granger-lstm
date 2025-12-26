@@ -702,9 +702,6 @@ param_spaces = {
         "clf__estimator__class_weight": Categorical([None, "balanced"]),
         "clf__estimator__max_iter": Integer(1000, 10000),
     },
-    "GaussianNB": {
-        "clf__var_smoothing": Real(1e-12, 1e-6, prior="log-uniform"),
-    },
     "QDA": {
         "clf__reg_param": Real(0.0, 1.0, prior="uniform"),
     },
@@ -873,4 +870,5 @@ results_df = results_df.sort_values(
 )
 print("\nClassification Report Summary (Leak-Free):")
 print(results_df)
+
 
