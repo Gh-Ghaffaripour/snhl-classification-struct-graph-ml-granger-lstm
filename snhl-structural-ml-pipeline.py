@@ -1,5 +1,5 @@
 # """
-# Combined Structural MRI ML pipeline
+#  Structural MRI ML pipeline
 #
 # - Reads precomputed structural CSV feature tables
 # - Merges features into a subject-level DataFrame
@@ -517,3 +517,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
