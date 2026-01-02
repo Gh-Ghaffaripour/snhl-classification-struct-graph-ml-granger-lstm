@@ -1,22 +1,21 @@
-# """
-# Combined Structural + Whole MRI ML pipeline
-#
-# - Reads precomputed structural and whole-brain CSV feature tables
-# - Merges features into a subject-level DataFrame
-# - Cleans and preprocesses data
-# - Removes outliers and highly correlated features
-# - Performs feature selection via RFE with LightGBM
-# - Tunes multiple classifiers using Bayesian optimization
-# - Evaluates models with leak-free threshold selection
-# - Generates figures and exports a Word report
-#
-# Author: <Hossein Gharedaghi>
-# """
-#
+"""
+Combined Structural + Whole MRI ML pipeline
+
+- Reads precomputed structural and whole-brain CSV feature tables
+- Merges features into a subject-level DataFrame
+- Cleans and preprocesses data
+- Removes outliers and highly correlated features
+- Performs feature selection via RFE with LightGBM
+- Tunes multiple classifiers using Bayesian optimization
+- Evaluates models with leak-free threshold selection
+- Generates figures and exports a Word report
+
+Author: <your name>
+"""
 
 # Imports
 
-#
+
 import os
 import numpy as np
 import pandas as pd
@@ -155,28 +154,6 @@ def plot_correlation_matrix(
         plt.savefig(save_path, dpi=600, bbox_inches="tight")
     plt.show()
 
-
-def remove_highly_correlated_features(
-    X: pd.DataFrame,
-    y: np.ndarray,
-    threshold: float = 0.8,
-):
-    """Remove correlated features, keeping those more correlated with label."""
-    corr = X.corr()
-    label_corr = X.corrwith(pd.Series(y)).abs()
-
-    drop_features = set()
-    for i in range(len(corr.columns)):
-        for j in range(i):
-            if abs(corr.iloc[i, j]) > threshold:
-                f1, f2 = corr.columns[i], corr.columns[j]
-                drop = f1 if label_corr[f1] < label_corr[f2] else f2
-                drop_features.add(drop)
-
-    return X.drop(columns=drop_features), list(drop_features)
-
-
-
 # Threshold Optimization (Leak-Free)
 
 
@@ -214,7 +191,7 @@ def estimate_threshold_cv(model, X, y, cv_splits=5):
 
 def main():
 
-
+   
     # Load & merge data
 
     df_struct = pd.read_csv(STRUCTURAL_CSV)
@@ -231,54 +208,41 @@ def main():
     X = df.drop("label", axis=1)
     y = df["label"].values
 
-
+  
     # Train-test split
-
+    
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=1, stratify=y
     )
 
-
+    # ------------------------------------------------------------
     # Imputation
-
+    # ------------------------------------------------------------
     imputer = KNNImputer(n_neighbors=5)
-    X_train = pd.DataFrame(
-        imputer.fit_transform(X_train), columns=X_train.columns
-    )
-    X_test = pd.DataFrame(
-        imputer.transform(X_test), columns=X_train.columns
-    )
+    X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
+    X_test = pd.DataFrame(imputer.transform(X_test), columns=X_train.columns)
 
 
-    # Outlier removal
+    # Outlier removal 
+ 
 
     X_train = remove_extreme_outliers(X_train)
     X_test = X_test[X_train.columns]
-
-
-
-
-
 
     plot_correlation_matrix(
         X_train, "Combined pipeline", CORR_FIG_1
     )
 
 
-    # Correlation filtering
+    # Correlation filtering (mimic first script exactly)
 
-    X_train, dropped = remove_highly_correlated_features(
-        X_train, y_train
-    )
-    X_test = X_test[X_train.columns]
-    #
+ 
 
     y_train_df = pd.DataFrame(y_train, columns=["label"])
 
     corr_orig = X_train.corr()
     threshold = 0.8
 
-    # Mimic first script: use this DataFrame directly
     label_corr = X_train.corrwith(y_train_df).abs()
 
     highly_correlated = set()
@@ -293,25 +257,19 @@ def main():
     X_train = X_train.drop(columns=highly_correlated)
     X_test = X_test[X_train.columns]
 
-
-
-
     plot_correlation_matrix(
         X_train, "Combined (reduced)", CORR_FIG_2
     )
 
 
-
-
-
-    # Scaling
+   # Scaling
 
     scaler = StandardScaler()
     X_train_s = scaler.fit_transform(X_train)
     X_test_s = scaler.transform(X_test)
 
-
-    # RFE with LightGBM
+   
+   # RFE with LightGBM
 
     lgbm = LGBMClassifier(
         n_estimators=200,
@@ -332,6 +290,7 @@ def main():
     selected_features = X_train.columns[rfe.get_support()].tolist()
     print("Selected features:", selected_features)
 
+
     plot_correlation_matrix(
         pd.DataFrame(X_train_rfe, columns=selected_features),
         "Selected combined features",
@@ -347,22 +306,17 @@ def main():
     'GradientBoosting': GradientBoostingClassifier(random_state=42),
     'HistGradientBoosting': HistGradientBoostingClassifier(random_state=42),
     'XGBoost': XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42),
-    #
-
+    
     'KNN': KNeighborsClassifier(),
     'SVM': SVC(probability=True, random_state=42),
     'NuSVC': NuSVC(probability=True, random_state=42,class_weight="balanced"),
     'LogisticRegression': LogisticRegression(solver='liblinear', random_state=42),
-
-
     'CalibratedRidge': CalibratedClassifierCV(
         estimator=RidgeClassifier(random_state=42), method='sigmoid', cv=5
     ),
     'CalibratedLinearSVC': CalibratedClassifierCV(
         estimator=LinearSVC(random_state=42, dual=False), method='sigmoid', cv=5
     ),
-
-
     'QDA': QuadraticDiscriminantAnalysis(),
     'AdaBoost': AdaBoostClassifier(random_state=42),
     }
@@ -384,23 +338,19 @@ def main():
         'clf__min_samples_split': Integer(2, 20),
         'clf__min_samples_leaf': Integer(1, 10),
         'clf__max_features': Categorical(['sqrt', 'log2', None]),
-
-    },
-
-
+        'clf__criterion': Categorical(['gini', 'entropy', 'log_loss'])    },
 
     'GradientBoosting':  {
-    'clf__n_estimators': Integer(200, 1200),
+    'clf__n_estimators': Integer(200, 1200),      
     'clf__learning_rate': Real(0.01, 0.1, prior='log-uniform'),
-    'clf__max_depth': Integer(3, 6),
-    'clf__subsample': Real(0.6, 0.9),
-    'clf__loss': Categorical(['log_loss']),
-    'clf__min_samples_split': Integer(10, 100),
-    'clf__min_samples_leaf': Integer(20, 200),
+    'clf__max_depth': Integer(3, 6),               
+    'clf__subsample': Real(0.6, 0.9),               
+    'clf__loss': Categorical(['log_loss']),         
+    'clf__min_samples_split': Integer(10, 100),    
+    'clf__min_samples_leaf': Integer(20, 200),     
     'clf__max_features': Real(0.2, 0.8),
     'clf__max_leaf_nodes': Integer(10, 200),
    },
-
 
 
 
@@ -426,13 +376,6 @@ def main():
     'clf__min_child_weight': Integer(3, 12),
 },
 
-    'CatBoost': {
-        'clf__iterations': Integer(50, 300),
-        'clf__depth': Integer(3, 10),
-        'clf__learning_rate': Real(0.01, 0.3, prior='log-uniform'),
-        'clf__l2_leaf_reg': Real(1.0, 10.0),
-        'clf__border_count': Integer(32, 255)
-    },
 
     'KNN': {
         'clf__n_neighbors': Integer(3, 20),
@@ -447,11 +390,7 @@ def main():
         'clf__gamma': Categorical(['scale', 'auto']),
         'clf__degree': Categorical([2, 3, 4, 5, 6]),
         'clf__shrinking': Categorical([True, False]),
-
-
     },
-
-
 
    'NuSVC': {
     'clf__nu': Real(0.1, 0.5, prior='uniform'),
@@ -463,13 +402,17 @@ def main():
 
 
          'LogisticRegression':  {
-   'clf__C': Real(1e-3, 1e3, prior='log-uniform', name='C'),  # Broader range
+   'clf__C': Real(1e-3, 1e3, prior='log-uniform', name='C'), 
     'clf__penalty': Categorical(['l2'], name='penalty'),
     'clf__solver': Categorical(['liblinear', 'saga', ], name='solver'),
-    'clf__tol': Real(1e-6, 1e-2, prior='log-uniform', name='tol'),  # More precision
+    'clf__tol': Real(1e-6, 1e-2, prior='log-uniform', name='tol'), 
+             
     },
 
-
+    'RidgeClassifier': {
+        'clf__alpha': Real(0.1, 100.0, prior='log-uniform'),
+        'clf__solver': Categorical(['auto', 'sag', 'saga', 'lsqr'])
+    },
 
     'CalibratedRidge': {
         'clf__estimator__alpha': Real(0.1, 100.0, prior='log-uniform'),
@@ -481,7 +424,7 @@ def main():
     'clf__estimator__max_iter': Integer(500, 3000),
     },
 
-
+   
     'QDA': {
         'clf__reg_param': Real(0.0, 1.0, prior='uniform')
     },
@@ -492,8 +435,6 @@ def main():
     'clf__algorithm': Categorical(['SAMME'], name='algorithm'), # Added algorithm choice, added name
     'clf__random_state': Integer(1, 10, name='random_state') #Added random_state, added name.
      },
-
-
 
     }
 
