@@ -214,9 +214,9 @@ def main():
         X, y, test_size=0.2, random_state=1, stratify=y
     )
 
-    # ------------------------------------------------------------
+
     # Imputation
-    # ------------------------------------------------------------
+
     imputer = KNNImputer(n_neighbors=5)
     X_train = pd.DataFrame(imputer.fit_transform(X_train), columns=X_train.columns)
     X_test = pd.DataFrame(imputer.transform(X_test), columns=X_train.columns)
@@ -224,7 +224,7 @@ def main():
 
     # Outlier removal
 
-  
+
     X_train = remove_extreme_outliers(X_train)
     X_test = X_test[X_train.columns]
 
@@ -233,7 +233,7 @@ def main():
     )
 
 
-    # Correlation filtering 
+    # Correlation filtering
 
     y_train_df = pd.DataFrame(y_train, columns=["label"])
 
@@ -258,7 +258,7 @@ def main():
         X_train, "Combined (reduced)", CORR_FIG_2
     )
 
-   
+
    # Scaling
 
     scaler = StandardScaler()
@@ -422,7 +422,7 @@ def main():
             "clf__warm_start": Categorical([True, False]),
             "clf__dual": Categorical([False]),
         },
-   
+
         "CalibratedRidge": {
             "clf__estimator__alpha": Real(1e-4, 1e2, prior="log-uniform"),
             "clf__estimator__solver": Categorical(
@@ -474,7 +474,7 @@ def main():
 
     doc = Document()
     doc.add_heading(
-        "Combined MRI Classification Results (Leak-Free)", level=1
+        "Structural MRI Classification Results (Leak-Free)", level=1
     )
 
     for name, model in best_estimators.items():
