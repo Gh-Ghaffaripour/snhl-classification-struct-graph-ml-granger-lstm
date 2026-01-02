@@ -10,7 +10,7 @@ Combined Structural + Whole MRI ML pipeline
 - Evaluates models with leak-free threshold selection
 - Generates figures and exports a Word report
 
-Author: <your name>
+Author: <Hossein Gharedaghi>
 """
 
 # Imports
