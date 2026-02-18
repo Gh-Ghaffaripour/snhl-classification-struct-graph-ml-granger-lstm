@@ -76,9 +76,9 @@ from docx.shared import Inches
 # Configuration
 
 
-STRUCTURAL_CSV = r"D:\snhl\structural_output.csv"
-WHOLE_CSV      = r"D:\snhl\Whole_output.csv"
-OUTPUT_DIR     = r"D:\snhl"
+STRUCTURAL_CSV = r"structural_output.csv"
+WHOLE_CSV      = r"Whole_output.csv"
+OUTPUT_DIR     = r"outputs"
 
 CORR_FIG_1 = os.path.join(OUTPUT_DIR, "corr_combined_1.png")
 CORR_FIG_2 = os.path.join(OUTPUT_DIR, "corr_combined_2.png")
