@@ -401,13 +401,17 @@ def main():
    },
 
 
-         'LogisticRegression':  {
-   'clf__C': Real(1e-3, 1e3, prior='log-uniform', name='C'), 
-    'clf__penalty': Categorical(['l2'], name='penalty'),
-    'clf__solver': Categorical(['liblinear', 'saga', ], name='solver'),
-    'clf__tol': Real(1e-6, 1e-2, prior='log-uniform', name='tol'), 
-             
-    },
+     "LogisticRegression": {
+            "clf__C": Real(1e-5, 1e-2, prior="log-uniform"),
+            "clf__penalty": Categorical(["l1"]),
+            "clf__solver": Categorical(["saga"]),
+            "clf__tol": Real(0.1, 0.5, prior="log-uniform"),
+            "clf__fit_intercept": Categorical([False]),
+            "clf__class_weight": Categorical([None]),
+            "clf__max_iter": Categorical([20, 50]),
+            "clf__dual": Categorical([False]),
+        },
+
 
     'RidgeClassifier': {
         'clf__alpha': Real(0.1, 100.0, prior='log-uniform'),
