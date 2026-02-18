@@ -75,7 +75,7 @@ from docx.shared import Inches
 
 STRUCTURAL_CSV = r"structural_output.csv"
 
-OUTPUT_DIR     = r"snhl"
+OUTPUT_DIR     = r"outputs"
 
 CORR_FIG_1 = os.path.join(OUTPUT_DIR, "corr_Structural_1.png")
 CORR_FIG_2 = os.path.join(OUTPUT_DIR, "corr_Sructural_2.png")
@@ -517,5 +517,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
