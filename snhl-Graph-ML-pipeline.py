@@ -78,7 +78,7 @@ from docx.shared import Inches
 
 
 WHOLE_CSV      = r"Whole_output.csv"
-OUTPUT_DIR     = r"snhl"
+OUTPUT_DIR     = r"outputs"
 
 CORR_FIG_1 = os.path.join(OUTPUT_DIR, "corr_Functional_1.png")
 CORR_FIG_2 = os.path.join(OUTPUT_DIR, "corr_Functional_2.png")
